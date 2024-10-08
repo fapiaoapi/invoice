@@ -47,8 +47,8 @@
 | <div style="width:200px">字段名</div> | <div style="width:60px">字段类型</div> | <div style="width:60px">是否必填</div> | <div style="width:50px">默认值</div> | 描述                                                                           |
 |------------------------------------|----------------------------------|------------------------------------|-----------------------------------|------------------------------------------------------------------------------|
 | customer                           | object                           | 是                                  |                                   | 消费者抬头信息                                                                      |
-| &emsp;title                        | string                           | 是                                  |                                   | 密码，不为空                                                                       |
-| &emsp;tax_number                   | string                           |                                    |                                   | 抬头名称                                                                         |
+| &emsp;title                        | string                           | 是                                  |                                   | 名称(姓名/公司名称)                                                                  |
+| &emsp;tax_number                   | string                           |                                    |                                   | 税号(统一社会信用代码)                                                                 |
 | &emsp;address                      | 	string                          |                                    |                                   | 单位地址                                                                         |
 | &emsp;telephone                    | 	string                          |                                    |                                   | 单位电话(手机)号码                                                                   | 
 | &emsp;bank_name                    | 	string                          |                                    |                                   | 开户行银行名称                                                                      | 
@@ -64,7 +64,7 @@
 | &emsp;hsbz                         | 	int | 是                                  | 1                                 | 含税标志 0不含税,1含税                                                                |
 | &emsp;name                         | 	 string                           | 是                                  | 餐饮费                               | 商品名称                                                                         |
 | &emsp;spbmjc                       | 	string | 是                                  | 餐饮服务                              | 商品编码简称([商品和服务税收分类编码表](https://api.fa-piao.com/storage/商品和服务税收分类编码表.xlsx)可查询) | 
-| &emsp;spbm                         | 	 int | 是                                  | 3070401000000000000               | 商品编码([商品和服务税收分类编码表](https://api.fa-piao.com/storage/商品和服务税收分类编码表.xlsx)可查询)      | 
+| &emsp;spbm                         | 	 int | 是                                  | 3070401000000000000               | 商品编码([商品和服务税收分类编码表](https://api.fa-piao.com/storage/商品和服务税收分类编码表.xlsx)可查询)   | 
 | &emsp;dj                           | 	 float|                                    |                                   | 单价                                                                           | 
 | &emsp;spsl                         | 	float|                                    |                                   | 数量                                                                           |
 | &emsp;dw                           | 	string|                                    |                                   | 计量单位                                                                         |
