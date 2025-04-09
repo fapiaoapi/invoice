@@ -49,8 +49,8 @@
 
 1. 在[开放平台](https://open.fa-piao.com)进行企业账号注册
 2. 添加企业获得AppKey和AppSecret
-3. 接入调试
-
+3. 接入调试 
+demo [java](apiClient.java) [php](apiClient.php)  [python](apiClient.py) [golang](apiClient.go) [nodejs](apiClient.js) [c#](apiClient.cs)
 #### 公共请求Header参数
 
 | 名称            | 类型     | 示例值                                                     | 必须 | 参数说明                                      |
@@ -68,7 +68,7 @@
 | 项目           | 说明内容                                                 | 备注                  |
 | ------------ | ---------------------------------------------------- | ------------------- |
 | 调用方式         | https                                                | POST方式提交            |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/authorization |                     |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/authorization |                     |
 | 字符编码         | UTF-8                                                |                     |
 | 接口描述         | 获取授权                                                 | Authorization token |
 | Content-Type | form-data                                            |                     |
@@ -105,7 +105,7 @@
 | 项目           | 说明内容                                             | 备注       |
 | ------------ | ------------------------------------------------ | -------- |
 | 调用方式         | https                                            | POST方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/loginDppt |          |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/loginDppt |          |
 | 字符编码         | UTF-8                                            |          |
 | 接口描述         | 登录数电发票平台                                         | 登录电票平台   |
 | Content-Type | form-data                                        |          |
@@ -152,7 +152,7 @@
 | 项目           | 说明内容                                              | 备注       |
 | ------------ | ------------------------------------------------- | -------- |
 | 调用方式         | https                                             | GET 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/getFaceImg |          |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/getFaceImg |          |
 | 字符编码         | UTF-8                                             |          |
 | 接口描述         | 获取人脸二维码                                           |          |
 | Content-Type | form-data                                         |          |
@@ -208,7 +208,7 @@
 | 项目           | 说明内容                                                | 备注       |
 | ------------ | --------------------------------------------------- | -------- |
 | 调用方式         | https                                               | GET 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/getFaceState |          |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/getFaceState |          |
 | 字符编码         | UTF-8                                               |          |
 | 接口描述         | 获取人脸二维码认证状态                                         |          |
 | Content-Type | form-data                                           |          |
@@ -265,7 +265,7 @@
 | 项目           | 说明内容                                                      | 备注             |
 | ------------ | --------------------------------------------------------- | -------------- |
 | 调用方式         | https                                                     | POST方式提交       |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/queryFaceAuthState |                |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/queryFaceAuthState |                |
 | 字符编码         | UTF-8                                                     |                |
 | 接口描述         | 获取认证状态                                                    | 获取当前纳税人是否要人脸识别 |
 | Content-Type | form-data                                                 |                |
@@ -299,7 +299,7 @@
 | 项目           | 说明内容                                              | 备注        |
 | ------------ | ------------------------------------------------- | --------- |
 | 调用方式         | https                                             | POST 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/blueTicket |           |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/blueTicket |           |
 | 字符编码         | UTF-8                                             |           |
 | 接口描述         | 数电蓝票开具接口                                          |           |
 | Content-Type | form-data                                         |           |
@@ -566,7 +566,7 @@
 | 项目           | 说明内容                                                    | 备注        |
 | ------------ | ------------------------------------------------------- | --------- |
 | 调用方式         | https                                                   | POST 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/getInvoicePdfOfd |           |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/getInvoicePdfOfd |           |
 | 字符编码         | UTF-8                                                   |           |
 | 接口描述         | 获取销项数电版式文件                                              | 销项版式获取    |
 | Content-Type | form-data                                               |           |
@@ -630,7 +630,7 @@
 | 项目           | 说明内容                                                | 备注        |
 | ------------ | --------------------------------------------------- | --------- |
 | 调用方式         | https                                               | POST 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/retInviceMsg |           |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/retInviceMsg |           |
 | 字符编码         | UTF-8                                               |           |
 | 接口描述         | 数电申请红字前查蓝票信息接口                                      |           |
 | Content-Type | form-data                                           |           |
@@ -740,7 +740,7 @@
 | 项目           | 说明内容                                           | 备注        |
 | ------------ | ---------------------------------------------- | --------- |
 | 调用方式         | https                                          | POST 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/hzxxbsq |           |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/hzxxbsq |           |
 | 字符编码         | UTF-8                                          |           |
 | 接口描述         | 申请红字信息表                                        |           |
 | Content-Type | form-data                                      |           |
@@ -812,7 +812,7 @@
 | 项目           | 说明内容                                          | 备注        |
 | ------------ | --------------------------------------------- | --------- |
 | 调用方式         | https                                         | POST 方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/hzfpkj |           |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/hzfpkj |           |
 | 字符编码         | UTF-8                                         |           |
 | 接口描述         | 数电票负数开具                                       |           |
 | Content-Type | form-data                                     |           |
@@ -890,7 +890,7 @@
 | 项目           | 说明内容                                              | 备注                         |
 | ------------ | ------------------------------------------------- | -------------------------- |
 | 调用方式         | https                                             | POST方式提交                   |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/changeUser |                            |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/changeUser |                            |
 | 字符编码         | UTF-8                                             |                            |
 | 接口描述         | 切换电子税务局账号                                         | 适用于相同省份相同电子税局登录账号 不同企业间的切换 |
 | Content-Type | from-data                                         |                            |
@@ -929,7 +929,7 @@
 | 项目           | 说明内容                                              | 备注       |
 | ------------ | ------------------------------------------------- | -------- |
 | 调用方式         | https                                             | POST方式提交 |
-| 接口地址         | https\://api.fa-piao.com/v5/enterprise/creditLine |          |
+| 接口地址         | https://api.fa-piao.com/v5/enterprise/creditLine |          |
 | 字符编码         | UTF-8                                             |          |
 | 接口描述         | 授信额度查询                                            |          |
 | Content-Type | form-data                                         |          |
