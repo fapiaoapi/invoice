@@ -4,7 +4,7 @@
 发票 电子发票/数电发票/全电发票/数电票/开票
 基础
 
-[中文文档](https://github.com/fapiaoapi/invoice "文档")
+[中文文档](https://fa-piao.com/doc.html "文档")
 
 sdk [java](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://github.com/fapiaoapi/invoice-sdk-php)  [python](https://github.com/fapiaoapi/invoice-sdk-python) [golang](https://github.com/fapiaoapi/invoice-sdk-golang)
 
