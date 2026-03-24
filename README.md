@@ -32,7 +32,8 @@ sdk [java](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://github.c
 1. 在[开放平台](https://open.fa-piao.com)进行企业账号注册
 2. 添加企业获得AppKey和AppSecret
 3. 接入调试 
-demo [java](apiClient.java) [php](apiClient.php)  [python](apiClient.py) [golang](apiClient.go) [nodejs](apiClient.js) [c#](apiClient.cs)
+[java开票demo](BasicExample.java) [红冲demo](RedInvoiceExample.java) [计算税额demo](TaxExample.java)
+4. demo [php](apiClient.php)  [python](apiClient.py) [golang](apiClient.go) [nodejs](apiClient.js) [c#](apiClient.cs)
 #### 公共请求Header参数
 
 | 名称            | 类型     | 示例值                                                     | 必须 | 参数说明                                      |
@@ -45,7 +46,7 @@ demo [java](apiClient.java) [php](apiClient.php)  [python](apiClient.py) [golang
 
 #### 数电发票开票流程
 
-![数电发票开票流程图](fapiao.svg)
+![数电发票开票流程图](fapiao.png)
 
 | 项目           | 说明内容                                                 | 备注                  |
 | ------------ | ---------------------------------------------------- | ------------------- |
@@ -55,9 +56,12 @@ demo [java](apiClient.java) [php](apiClient.php)  [python](apiClient.py) [golang
 | 接口描述         | 获取授权                                                 | Authorization token |
 | Content-Type | form-data                                            |                     |
 
-| 名称     | 类型     | 必须 | 参数描述   |
-| ------ | ------ | -- | ------ |
-| nsrsbh | String | 是  | 纳税人识别号 |
+| 名称       | 类型     | 必须 | 参数描述       |
+|----------| ------ |----|------------|
+| nsrsbh   | String | 是  | 纳税人识别号     |
+| type     | String | 否  | 账户类型 6基础 7标准 |
+| username | String | 否  | 账号         |
+| password | String | 否  | 密码         |
 
 | 示例报文                        |
 | --------------------------- |
