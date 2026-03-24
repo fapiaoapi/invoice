@@ -6,7 +6,7 @@
 
 [中文文档](https://fa-piao.com/doc.html "文档")
 
-sdk [java](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://github.com/fapiaoapi/invoice-sdk-php)  [python](https://github.com/fapiaoapi/invoice-sdk-python) [golang](https://github.com/fapiaoapi/invoice-sdk-golang)
+sdk [java17+](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://github.com/fapiaoapi/invoice-sdk-php)  [python](https://github.com/fapiaoapi/invoice-sdk-python) [golang](https://github.com/fapiaoapi/invoice-sdk-golang)
 
 * 获取授权
 * 登录数电发票平台
@@ -32,7 +32,7 @@ sdk [java](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://github.c
 1. 在[开放平台](https://open.fa-piao.com)进行企业账号注册
 2. 添加企业获得AppKey和AppSecret
 3. 接入调试 
-[java开票demo](BasicExample.java) [红冲demo](RedInvoiceExample.java) [计算税额demo](TaxExample.java)
+[java8-16 开票demo](BasicExample.java) [红冲demo](RedInvoiceExample.java) [计算税额demo](TaxExample.java)
 4. demo [php](apiClient.php)  [python](apiClient.py) [golang](apiClient.go) [nodejs](apiClient.js) [c#](apiClient.cs)
 #### 公共请求Header参数
 
