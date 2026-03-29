@@ -1,12 +1,26 @@
 ## 发票接口文档目录
 
-这是一个用于对接发票接口(数电发票)的java SDK，支持发票开具、红冲、查询等功能。
+这是一个用于对接发票接口(数电发票)的SDK，支持发票开具、红冲、查询等功能。
 发票 电子发票/数电发票/全电发票/数电票/开票
-基础
+
+
+
+
+| SDK | GitHub | Gitee | 低版本                                                                                                                                                                                                                                                               |
+|-----|--------|-------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Java | [github.com/fapiaoapi/invoice-sdk-java](https://github.com/fapiaoapi/invoice-sdk-java) | [gitee.com/fapiaoapi/invoice-sdk-java](https://gitee.com/fapiaoapi/invoice-sdk-java) | java8-java16<br/>[开票demo](https://gitee.com/fapiaoapi/invoice/blob/master/BasicExample.java)<br/>[红冲demo](https://gitee.com/fapiaoapi/invoice/blob/master/RedInvoiceExample.java)<br/>[税额计算demo](https://gitee.com/fapiaoapi/invoice/blob/master/TaxExample.java) |
+| PHP | [github.com/fapiaoapi/invoice-sdk-php](https://github.com/fapiaoapi/invoice-sdk-php) | [gitee.com/fapiaoapi/invoice-sdk-php](https://gitee.com/fapiaoapi/invoice-sdk-php) |                                                                                                                                                                                                                                                                   |
+| Python | [github.com/fapiaoapi/invoice-sdk-python](https://github.com/fapiaoapi/invoice-sdk-python) | [gitee.com/fapiaoapi/invoice-sdk-python](https://gitee.com/fapiaoapi/invoice-sdk-python) |                                                                                                                                                                                                                                                                   |
+| Golang | [github.com/fapiaoapi/invoice-sdk-golang](https://github.com/fapiaoapi/invoice-sdk-golang) | [gitee.com/fapiaoapi/invoice-sdk-golang](https://gitee.com/fapiaoapi/invoice-sdk-golang) |                                                                                                                                                                                                                                                                   |
+| Nodejs | [github.com/fapiaoapi/invoice-sdk-nodejs](https://github.com/fapiaoapi/invoice-sdk-nodejs) | [gitee.com/fapiaoapi/invoice-sdk-nodejs](https://gitee.com/fapiaoapi/invoice-sdk-nodejs) |                                                                                                                                                                                                                                                                   |
+| C# | [github.com/fapiaoapi/invoice-sdk-csharp](https://github.com/fapiaoapi/invoice-sdk-csharp) | [gitee.com/fapiaoapi/invoice-sdk-csharp](https://gitee.com/fapiaoapi/invoice-sdk-csharp) | C#8-C#11<br/>[开票demo](https://gitee.com/fapiaoapi/invoice/blob/master/BasicExample.cs)<br/>[红冲demo](https://gitee.com/fapiaoapi/invoice/blob/master/RedInvoiceExample.cs)<br/>[税额计算demo](https://gitee.com/fapiaoapi/invoice/blob/master/TaxExample.cs)           |
+| C++ |  |  | [apiClient.cpp](https://gitee.com/fapiaoapi/invoice/blob/master/apiClient.cpp)                                                                                                                                                                                    |
+| postman |  |  | 下载<br/>[collection](fa-piao.com/fa-piao.postman_collection.json)<br/>和<br/>[environment](fa-piao.com/fa-piao.postman_environment.json)<br/>后导入postman可测试                                                                                                                                |
+| html |  |  | [前端模拟页面](fa-piao.com/fapiao.html)                                                                                                                                                                                                                                 |
 
 [中文文档](https://fa-piao.com/doc.html "文档")
 
-sdk [java17+](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://github.com/fapiaoapi/invoice-sdk-php)  [python](https://github.com/fapiaoapi/invoice-sdk-python) [golang](https://github.com/fapiaoapi/invoice-sdk-golang)
+基础
 
 * 获取授权
 * 登录数电发票平台
@@ -31,9 +45,8 @@ sdk [java17+](https://github.com/fapiaoapi/invoice-sdk-java) [php](https://githu
 
 1. 在[开放平台](https://open.fa-piao.com)进行企业账号注册
 2. 添加企业获得AppKey和AppSecret
-3. 接入调试 
-[java8-16 开票demo](BasicExample.java) [红冲demo](RedInvoiceExample.java) [计算税额demo](TaxExample.java)
-4. demo [php](apiClient.php)  [python](apiClient.py) [golang](apiClient.go) [nodejs](apiClient.js) [c#](apiClient.cs)
+3. 接入sdk调试
+
 #### 公共请求Header参数
 
 | 名称            | 类型     | 示例值                                                     | 必须 | 参数说明                                      |
