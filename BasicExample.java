@@ -1,58 +1,83 @@
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class BasicExample {
-    
     private static final String BASE_URL = "https://api.fa-piao.com";
 
+    public static String appKey = "";
+    public static String appSecret = "";
+
+    public static String nsrsbh = "";// 统一社会信用代码
+    public static String title = "";// 名称（营业执照）
+    public static String username = "";// 手机号码（电子税务局）
+    public static String password = "";// 个人用户密码（电子税务局）
+    public static String type = "6";// 6 基础 7标准
+    public static String xhdwdzdh = "重庆市渝北区龙溪街道丽园路2号XXXX 1325580XXXX"; // 地址和电话 空格隔开
+    public static String xhdwyhzh = "工商银行XXXX 15451211XXXX";// 开户行和银行账号 空格隔开
+
+    public static String token = "";
+    public static boolean debug = true; // 是否打印日志
 
     /**
      * 示例入口，演示POST multipart/form-data请求
      */
     public static void main(String[] args) throws Exception {
         try {
-            String appKey = "";
-            String appSecret = "";
 
-            String nsrsbh = "";//统一社会信用代码
-            String title = "";//名称（营业执照）
-            String username = "";//手机号码（电子税务局）
-            String password = "";//密码（电子税务局）
-            String type = "7";//6基础版 7标准
-            String token = "";
             System.setOut(new PrintStream(System.out, true, "UTF-8"));
             System.out.println("java " + System.getProperty("java.version"));
-            
-            if(token.isEmpty()) {// 获取token 建议redis缓存 30天
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<String> future = executor.submit(() -> new Scanner(System.in).nextLine());
+
+            if (token.isEmpty()) {// 获取token 建议redis缓存 30天
                 /*
                  * 获取授权Token文档
+                 * 
                  * @see https://fa-piao.com/doc.html#api1?source=github
                  */
                 Map<String, Object> formData = new LinkedHashMap<>();
                 formData.put("nsrsbh", nsrsbh);
                 formData.put("type", type);
-                // formData.put("username", username);
-                // formData.put("password", password);
-                ApiResponse tokenResponse = postRequest("/v5/enterprise/authorization",formData,"" ,appKey, appSecret);
-                token = tokenResponse.getTokenString();
-//                System.out.println("token: " + token);
+                formData.put("username", username);
+                formData.put("password", password);
+                ApiResponse tokenResponse = postRequest("/v5/enterprise/authorization", formData);
+                if (tokenResponse.getCode() == 200) {
+                    token = tokenResponse.getTokenString();
+                    // todo redis缓存 30天
+                    System.out.println("token: " + token);
+                }else{
+                    System.out.println("获取授权Token失败: " + tokenResponse.getBody());
+                    return;
+                }
             }
-
             /*
              * 前端模拟数电发票/电子发票开具 (蓝字发票)
+             * 
              * @see https://fa-piao.com/fapiao.html?source=github
              *
              */
@@ -60,24 +85,25 @@ public class BasicExample {
             /*
              *
              * 开票参数说明demo
+             * 
              * @see TaxExample.java
              */
 
-            //开具蓝票参数
+            // 开具蓝票参数
             Map<String, Object> invoiceParams = new LinkedHashMap<>();
             invoiceParams.put("fplxdm", "82");
             invoiceParams.put("fpqqlsh", appKey + System.currentTimeMillis());
             invoiceParams.put("ghdwmc", "个人");
-//                    invoiceParams.put("ghdwsbh", "914208XXXXXXX");
+            // invoiceParams.put("ghdwsbh", "914208XXXXXXX");
             invoiceParams.put("hjje", 396.04);
             invoiceParams.put("hjse", 3.96);
-            invoiceParams.put("jshj", 100);
+            invoiceParams.put("jshj", 400);
             invoiceParams.put("kplx", 0);
             invoiceParams.put("username", username);
-            invoiceParams.put("xhdwdzdh", "重庆市渝北区龙溪街道丽园路2号XXXX 1325580XXXX");
+            invoiceParams.put("xhdwdzdh", xhdwdzdh);
             invoiceParams.put("xhdwmc", title);
             invoiceParams.put("xhdwsbh", nsrsbh);
-            invoiceParams.put("xhdwyhzh", "工商银行XXXX 15451211XXXX");
+            invoiceParams.put("xhdwyhzh", xhdwyhzh);
             invoiceParams.put("zsfs", 0);
             invoiceParams.put("fyxm[0][fphxz]", 0);
             invoiceParams.put("fyxm[0][spmc]", "*软件维护服务*接口服务费");
@@ -103,31 +129,32 @@ public class BasicExample {
 
             /*
              * 开具数电发票文档
+             * 
              * @see https://fa-piao.com/doc.html#api6?source=github
              *
              */
-            ApiResponse invoiceResponse = postRequest("/v5/enterprise/blueTicket",invoiceParams,token, appKey, appSecret);
+            ApiResponse invoiceResponse = postRequest("/v5/enterprise/blueTicket", invoiceParams);
 
-            switch (invoiceResponse.getCode()){//
+            switch (invoiceResponse.getCode()) {//
                 case 200:
-                   String fphm = invoiceResponse.getDataString("Fphm");
-                   String kprq = invoiceResponse.getDataString("Kprq");
-                   if (fphm == null || kprq == null) {
-                       System.out.println("返回字段缺失: " + invoiceResponse.getBody());
-                       return;
-                   }
-                   System.out.println("发票号码: " + fphm);
-                   System.out.println("开票日期: " + kprq);
+                    String fphm = invoiceResponse.getDataString("Fphm");
+                    String kprq = invoiceResponse.getDataString("Kprq");
+                    if (fphm == null || kprq == null) {
+                        System.out.println("返回字段缺失: " + invoiceResponse.getBody());
+                        return;
+                    }
+                    System.out.println("发票号码: " + fphm);
+                    System.out.println("开票日期: " + kprq);
 
-                  Map<String, Object> pdfParams = new HashMap<>();
+                    Map<String, Object> pdfParams = new HashMap<>();
                     pdfParams.put("downflag", "4");
                     pdfParams.put("nsrsbh", nsrsbh);
                     pdfParams.put("username", username);
                     pdfParams.put("fphm", fphm);
                     pdfParams.put("Kprq", kprq);
-                    ApiResponse pdfResponse = postRequest("/v5/enterprise/pdfOfdXml",pdfParams,token, appKey, appSecret);
+                    ApiResponse pdfResponse = postRequest("/v5/enterprise/pdfOfdXml", pdfParams);
                     if (pdfResponse.getCode() == 200) {
-                        System.out.println("下载发票成功："+ pdfResponse.getBody());
+                        System.out.println("下载发票成功：" + pdfResponse.getBody());
                     } else {
                         System.out.println("下载发票失败:" + pdfResponse.getMsg());
                     }
@@ -136,6 +163,7 @@ public class BasicExample {
                     System.out.println("登录(短信认证)");
                     /*
                      * 前端模拟短信认证弹窗
+                     * 
                      * @see https://fa-piao.com/fapiao.html?action=sms&source=github
                      */
                     // 1. 发短信验证码
@@ -146,30 +174,60 @@ public class BasicExample {
                     smsData.put("nsrsbh", nsrsbh);
                     smsData.put("username", username);
                     smsData.put("password", password);
-//                    ApiResponse smsResponse = postRequest("/v5/enterprise/loginDppt",smsData,token, appKey, appSecret);
-//                    if (smsResponse.getCode() == 200) {
-//                        System.out.println("发送短信成功：");
-//                    } else {
-//                        System.out.println("发送短信失败:" + smsResponse.getMsg());
-//                    }
-                    // // 等待60秒
-                    // Thread.sleep(60000);
-                     // 2. 输入验证码
-//                     smsData.put("sms", 399073); // 假设验证码为399073
-//                     ApiResponse codeResponse = postRequest("/v5/enterprise/loginDppt",smsData,token, appKey, appSecret);
-//                     if (codeResponse.getCode() == 200) {
-//                         System.out.println("验证短信成功：");
-//                     } else {
-//                         System.out.println("验证短信失败:" + codeResponse.getMsg());
-//                     }
+                    ApiResponse smsResponse = postRequest("/v5/enterprise/loginDppt", smsData);
+                    if (smsResponse.getCode() == 200) {
+                        System.out.println("请输入验证码");
+                        try {
+                            System.out.print("300秒内("
+                                    + LocalDateTime.now().plusSeconds(300)
+                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                                    + "前)输入内容: ");
+                            String smsCode = future.get(300, TimeUnit.SECONDS);
+
+                            System.out.println("🎉 成功获取输入: " + smsCode + " \n" + "当前时间: " + LocalDateTime.now()
+                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                            // 2. 输入验证码
+                            /*
+                             * @see https://fa-piao.com/doc.html#api2?source=github
+                             */
+                            smsData.put("sms", smsCode);
+                            ApiResponse codeResponse = postRequest("/v5/enterprise/loginDppt", smsData);
+                            if (codeResponse.getCode() == 200) {
+                                System.out.println("验证短信成功：");
+                                ApiResponse invoiceResponse2 = postRequest("/v5/enterprise/blueTicket", invoiceParams);
+                                if (invoiceResponse2.getCode() == 200) {
+                                    Map<String, Object> pdfParams2 = new HashMap<>();
+                                    pdfParams2.put("downflag", "4");
+                                    pdfParams2.put("nsrsbh", nsrsbh);
+                                    pdfParams2.put("username", username);
+                                    pdfParams2.put("fphm", invoiceResponse2.getDataString("Fphm"));
+                                    pdfParams2.put("kprq", invoiceResponse2.getDataString("Kprq"));
+                                    ApiResponse pdfResponse2 = postRequest("/v5/enterprise/pdfOfdXml", pdfParams2);
+                                    if (pdfResponse2.getCode() == 200) {
+                                        System.out.println("下载发票成功：" + pdfResponse2.getBody());
+                                    }
+                                }else{
+                                    System.out.println(invoiceResponse2.getCode()+"开票失败:" + invoiceResponse2.getMsg());
+                                }
+                            } else {
+                                System.out.println("验证短信失败:" + codeResponse.getMsg());
+                            }
+
+                        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                            System.out.println("\n短信认证输入超时！");
+                            future.cancel(true);
+                        }
+                        executor.shutdown();
+                    }
 
                     break;
                 case 430:
                     System.out.println("人脸认证");
                     /*
-                    * 前端模拟人脸认证弹窗
-                    * @see https://fa-piao.com/fapiao.html?action=face&source=github
-                    */
+                     * 前端模拟人脸认证弹窗
+                     * 
+                     * @see https://fa-piao.com/fapiao.html?action=face&source=github
+                     */
                     // 1. 获取人脸二维码
                     /*
                      * @see https://fa-piao.com/doc.html#api3?source=github
@@ -177,49 +235,100 @@ public class BasicExample {
                     Map<String, Object> faceData = new LinkedHashMap<>();
                     faceData.put("nsrsbh", nsrsbh);
                     faceData.put("username", username);
-//                    ApiResponse faceResponse = getRequest("/v5/enterprise/getFaceImg",faceData,token, appKey, appSecret);
-//                    String rzid = "";
-//                    if (faceResponse.getCode() == 200) {
-//                        System.out.println("获取人脸二维码成功："+ faceResponse.getBody());
-//                        String ewmly = faceResponse.getDataString("ewmly");
-//                        String ewm = faceResponse.getDataString("ewm");
-//                        rzid = faceResponse.getDataString("rzid");
-//                        if (ewmly != null) {
-//                            System.out.println("swj".equals(ewmly) ? "请使用税务局app扫码" : "个人所得税app扫码");
-//                        }
-//                        if (ewm != null && ewm.length() < 500) {
-//                            //todo 字符串转图片base 返回给前端
-//                            // String base64Uri = "data:image/png;base64," + base64;
-//                            // 前端使用示例: <img src="base64Uri" />
-//                        }
-//                    } else {
-//                        System.out.println("获取人脸二维码失败:" + faceResponse.getMsg());
-//                    }
-                    // 2. 认证完成后获取人脸二维码认证状态
-                     /*
-                      * @see https://fa-piao.com/doc.html#api4?source=github
-                      */
-//                     Map<String, Object> faceStatusData = new LinkedHashMap<>();
-//                     faceStatusData.put("nsrsbh", nsrsbh);
-//                     faceStatusData.put("username", username);
-//                     faceStatusData.put("rzid", rzid);
-//                     ApiResponse faceStatusResponse = getRequest("/v5/enterprise/getFaceState",faceStatusData,token, appKey, appSecret);
-//                     if (faceStatusResponse.getCode() == 200) {
-//                         String slzt = faceStatusResponse.getDataString("slzt");
-//                         String status = "1".equals(slzt) ? "未认证" : ("2".equals(slzt) ? "成功" : "二维码过期");
-//                         System.out.println("认证状态: " + status);
-//                     } else {
-//                         System.out.println("获取人脸二维码认证状态失败:" + faceStatusResponse.getMsg());
-//                     }
+                    ApiResponse faceResponse = getRequest("/v5/enterprise/getFaceImg", faceData);
+                    String rzid = "";
+                    if (faceResponse.getCode() == 200) {
+                        System.out.println("获取人脸二维码成功：" + faceResponse.getBody());
+                        String ewmly = faceResponse.getDataString("ewmly");
+                        String ewm = faceResponse.getDataString("ewm");
+                        rzid = faceResponse.getDataString("rzid");
+                        if (ewmly != null) {
+                            System.out.println("swj".equals(ewmly) ? "请使用电子税务局app扫码" : "个人所得税app扫码");
+                        }
+                        if (ewm != null && ewm.length() < 500) {
+                            // todo 字符串转图片base 返回给前端
+                            // String base64Uri = "data:image/png;base64," + base64;
+                            // 前端使用示例: <img src="base64Uri" />
+                        }
+                        // 字符串转二维码图片 命令行终端打印
+                        stringToQrcode(ewm);
+                        System.out.println("成功做完人脸认证,请输入数字 1");
+                        try {
+                            System.out.print("300秒内(" + LocalDateTime.now().plusSeconds(300)
+                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "前)输入内容: ");
+                            String inputNum = future.get(300, TimeUnit.SECONDS);
+                            System.out.println("🎉 成功获取输入: " + inputNum + " \n" + "当前时间: "
+                                    + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                            // 2. 认证完成后获取人脸二维码认证状态
+                            /*
+                             * @see https://fa-piao.com/doc.html#api4?source=github
+                             */
+                            Map<String, Object> faceStatusData = new LinkedHashMap<>();
+                            faceStatusData.put("nsrsbh", nsrsbh);
+                            faceStatusData.put("username", username);
+                            faceStatusData.put("rzid", rzid);
+                            ApiResponse faceStatusResponse = getRequest("/v5/enterprise/getFaceState", faceStatusData);
+                            if (faceStatusResponse.getCode() == 200) {
+                                String slzt = faceStatusResponse.getDataString("slzt");
+                                if ("2".equals(slzt)) {
+                                    System.out.println("认证状态: 成功");
+                                    System.out.println("请再次调用blueTicket");
+                                    ApiResponse invoiceResponse2 = postRequest("/v5/enterprise/blueTicket",
+                                            invoiceParams);
+                                    if (invoiceResponse2.getCode() == 200) {
+                                        Map<String, Object> pdfParams2 = new HashMap<>();
+                                        pdfParams2.put("downflag", "4");
+                                        pdfParams2.put("nsrsbh", nsrsbh);
+                                        pdfParams2.put("username", username);
+                                        pdfParams2.put("fphm", invoiceResponse2.getDataString("Fphm"));
+                                        pdfParams2.put("kprq", invoiceResponse2.getDataString("Kprq"));
+                                        ApiResponse pdfResponse2 = postRequest("/v5/enterprise/pdfOfdXml", pdfParams2);
+                                        if (pdfResponse2.getCode() == 200) {
+                                            System.out.println("下载发票成功：" + pdfResponse2.getBody());
+                                        }
+                                    }
+                                } else {
+                                    System.out.println("认证状态: " + ("1".equals(slzt) ? "未认证" : "二维码过期"));
+                                }
+                            } else {
+                                System.out.println("获取人脸二维码认证状态失败:" + faceStatusResponse.getMsg());
+                            }
+
+                        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                            System.out.println("\n人脸认证输入超时！");
+                            future.cancel(true);
+                        }
+                        executor.shutdown();
+                    } else {
+                        System.out.println("获取人脸二维码失败:" + faceResponse.getMsg());
+                    }
+
                     break;
                 case 401:
                     // token过期 重新获取并缓存token
                     System.out.println("授权失败:" + invoiceResponse.getMsg());
+                    System.out.println("401  token过期 重新获取并缓存token");
                     // 重新获取token的逻辑
+                    ApiResponse tokenResponse = postRequest("/v5/enterprise/authorization", formData);
+                    token = tokenResponse.getTokenString();
+                    System.out.println("再调用blueTicket");
+                    ApiResponse invoiceResponse2 = postRequest("/v5/enterprise/blueTicket", invoiceParams);
+                    if (invoiceResponse2.getCode() == 200) {
+                        Map<String, Object> pdfParams2 = new HashMap<>();
+                        pdfParams2.put("downflag", "4");
+                        pdfParams2.put("nsrsbh", nsrsbh);
+                        pdfParams2.put("username", username);
+                        pdfParams2.put("fphm", invoiceResponse2.getDataString("Fphm"));
+                        pdfParams2.put("kprq", invoiceResponse2.getDataString("Kprq"));
+                        ApiResponse pdfResponse2 = postRequest("/v5/enterprise/pdfOfdXml", pdfParams2);
+                        if (pdfResponse2.getCode() == 200) {
+                            System.out.println("下载发票成功：" + pdfResponse2.getBody());
+                        }
+                    }
                     break;
                 default:
                     System.out.println(invoiceResponse.getCode() + " " + invoiceResponse.getMsg());
-                    break;         
+                    break;
             }
         } catch (Exception e) {
             System.out.println("请求异常：" + e.getMessage());
@@ -227,16 +336,15 @@ public class BasicExample {
         }
     }
 
-
     /**
      * post 请求
      */
-    public static ApiResponse postRequest(String path,Map<String, Object> formData, String token, String appKey, String appSecret) throws Exception {
+    public static ApiResponse postRequest(String path, Map<String, Object> formData) throws Exception {
 
         String randomString = generateRandomString(20);
         String timestamp = String.valueOf(Instant.now().getEpochSecond());
 
-        String signature = calculateSignature("POST", path, randomString, timestamp,appKey,appSecret);
+        String signature = calculateSignature("POST", path, randomString, timestamp, appKey, appSecret);
 
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("AppKey", appKey);
@@ -246,7 +354,6 @@ public class BasicExample {
         if (token != null && !token.isEmpty()) {
             headers.put("Authorization", "Bearer " + token);
         }
-
 
         return postMultipart(path, headers, formData);
     }
@@ -254,13 +361,13 @@ public class BasicExample {
     /**
      * 发送GET请求，参数拼接在URL中
      */
-    public static ApiResponse getRequest(String path,Map<String, Object> params, String token, String appKey, String appSecret ) throws Exception {
+    public static ApiResponse getRequest(String path, Map<String, Object> params) throws Exception {
         String query = buildQueryString(params);
         String urlString = BASE_URL + path + (query.isEmpty() ? "" : "?" + query);
 
         String randomString = generateRandomString(20);
         String timestamp = String.valueOf(Instant.now().getEpochSecond());
-        String signature = calculateSignature("GET", path, randomString, timestamp,appKey,appSecret);
+        String signature = calculateSignature("GET", path, randomString, timestamp, appKey, appSecret);
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("AppKey", appKey);
         headers.put("Sign", signature);
@@ -269,8 +376,11 @@ public class BasicExample {
         if (token != null && !token.isEmpty()) {
             headers.put("Authorization", "Bearer " + token);
         }
+        debugRequest(urlString, "GET", headers, params);
         HttpURLConnection connection = openConnection(urlString, "GET", headers);
-        return readResponse(connection);
+        ApiResponse response = readResponse(connection);
+        debugResponse(response);
+        return response;
     }
 
     /**
@@ -281,6 +391,7 @@ public class BasicExample {
         String boundary = "----JavaFormBoundary" + generateRandomString(24);
         byte[] body = buildMultipartBody(formData, boundary);
         String urlString = BASE_URL + path;
+        debugRequest(urlString, "POST", headers, formData);
         HttpURLConnection connection = openConnection(urlString, "POST", headers);
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
@@ -288,7 +399,76 @@ public class BasicExample {
         connection.getOutputStream().write(body);
         connection.getOutputStream().flush();
         connection.getOutputStream().close();
-        return readResponse(connection);
+        ApiResponse response = readResponse(connection);
+        debugResponse(response);
+        return response;
+    }
+
+    public static void stringToQrcode(String content) {
+        File jar = new File("zxing-core-3.5.3.jar");
+        if (!jar.isFile()) {
+            System.out.print("缺少 zxing-core-3.5.3.jar (Missing zxing-core-3.5.3.jar) !!");
+            return;
+        }
+        try (URLClassLoader loader = new URLClassLoader(new URL[] { jar.toURI().toURL() },
+                InputExample.class.getClassLoader())) {
+            Class<?> writerClass = Class.forName("com.google.zxing.qrcode.QRCodeWriter", true, loader);
+            Class<?> formatClass = Class.forName("com.google.zxing.BarcodeFormat", true, loader);
+            Class<?> hintClass = Class.forName("com.google.zxing.EncodeHintType", true, loader);
+            Class<?> ecClass = Class.forName("com.google.zxing.qrcode.decoder.ErrorCorrectionLevel", true, loader);
+            Map<Object, Object> hints = new HashMap<>();
+            hints.put(enumValue(hintClass, "CHARACTER_SET"), "UTF-8");
+            hints.put(enumValue(hintClass, "ERROR_CORRECTION"), enumValue(ecClass, "H"));
+            hints.put(enumValue(hintClass, "MARGIN"), 4);
+            Object writer = writerClass.getDeclaredConstructor().newInstance();
+            Method encode = writerClass.getMethod("encode", String.class, formatClass, int.class, int.class, Map.class);
+            Object matrix = encode.invoke(writer, content, enumValue(formatClass, "QR_CODE"), 1, 1, hints);
+            Method getWidth = matrix.getClass().getMethod("getWidth");
+            Method getHeight = matrix.getClass().getMethod("getHeight");
+            Method get = matrix.getClass().getMethod("get", int.class, int.class);
+            int width = (Integer) getWidth.invoke(matrix);
+            int height = (Integer) getHeight.invoke(matrix);
+            System.out.println();
+            for (int y = 0; y < height; y += 2) {
+                StringBuilder line = new StringBuilder(width);
+                for (int x = 0; x < width; x++) {
+                    boolean top = (Boolean) get.invoke(matrix, x, y);
+                    boolean bottom = y + 1 < height && (Boolean) get.invoke(matrix, x, y + 1);
+                    line.append(top ? (bottom ? '█' : '▀') : (bottom ? '▄' : ' '));
+                }
+                System.out.println(line);
+            }
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Object enumValue(Class<?> enumClass, String name) {
+        for (Object v : enumClass.getEnumConstants()) {
+            if (((Enum<?>) v).name().equals(name))
+                return v;
+        }
+        throw new IllegalArgumentException(name);
+    }
+
+    private static void debugRequest(String url, String method, Map<String, String> headers,
+            Map<String, Object> params) {
+        if (!debug) {
+            return;
+        }
+        System.out.println("[debug] url=" + url);
+        System.out.println("[debug] method=" + method);
+        System.out.println("[debug] headers=" + (headers == null ? "{}" : headers));
+        System.out.println("[debug] params=" + (params == null ? "{}" : params));
+    }
+
+    private static void debugResponse(ApiResponse response) {
+        if (!debug) {
+            return;
+        }
+        System.out.println("[debug] statusCode=" + (response == null ? "" : response.getStatusCode()));
+        System.out.println("[debug] response=" + (response == null ? "" : response.getBody()));
     }
 
     /**
@@ -298,8 +478,8 @@ public class BasicExample {
         SecureRandom random = new SecureRandom();
         String chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         StringBuilder sb = new StringBuilder();
-        
-        for(int i=0; i<length; i++) {
+
+        for (int i = 0; i < length; i++) {
             int index = random.nextInt(chars.length());
             sb.append(chars.charAt(index));
         }
@@ -309,19 +489,18 @@ public class BasicExample {
     /**
      * 计算签名
      */
-    private static String calculateSignature(String method, String path, 
-                                            String randomString, String timestamp,
-                                            String appKey, String appSecret) 
-                                            throws Exception {
+    private static String calculateSignature(String method, String path,
+            String randomString, String timestamp,
+            String appKey, String appSecret)
+            throws Exception {
         String content = String.format(
-            "Method=%s&Path=%s&RandomString=%s&TimeStamp=%s&AppKey=%s",
-            method, path, randomString, timestamp, appKey
-        );
-        
+                "Method=%s&Path=%s&RandomString=%s&TimeStamp=%s&AppKey=%s",
+                method, path, randomString, timestamp, appKey);
+
         Mac sha256 = Mac.getInstance("HmacSHA256");
         SecretKeySpec secretKey = new SecretKeySpec(appSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         sha256.init(secretKey);
-        
+
         byte[] hash = sha256.doFinal(content.getBytes(StandardCharsets.UTF_8));
         return bytesToHex(hash).toUpperCase();
     }
@@ -333,7 +512,8 @@ public class BasicExample {
         StringBuilder hexString = new StringBuilder();
         for (byte b : hash) {
             String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) hexString.append('0');
+            if (hex.length() == 1)
+                hexString.append('0');
             hexString.append(hex);
         }
         return hexString.toString();
@@ -412,7 +592,7 @@ public class BasicExample {
             return null;
         }
 
-        public String getTokenString () {
+        public String getTokenString() {
             Object data = getData();
             if (data instanceof Map) {
                 Object token = ((Map<?, ?>) data).get("token");
